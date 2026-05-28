@@ -2,32 +2,41 @@
 
 This document lists the credentials needed to work on the Onboarding project.
 
-## GitHub Access
+## GitHub Access for CI/CD
+
+The GitHub access token (PAT) for CI/CD operations is stored exclusively in **Paperclip secrets**. It is **never** hardcoded in repository files, documentation, or configuration.
+
+| Credential | Stored In | Used For |
+|------------|-----------|----------|
+| **GitHub access token** | Paperclip secrets | CI/CD, automated pushes, workflow dispatch |
+
+### Accessing the Token
+
+When working within the Paperclip environment, the token is available through Paperclip's secret management system. Do **not** copy it into `.env` files, workflow YAML, or documentation.
+
+## GitHub Accounts for Developers
 
 | Credential | Required For | How to Get It |
 |------------|-------------|---------------|
-| **GitHub account** | All Git operations | Create at [github.com](https://github.com) |
-| **Personal Access Token (PAT)** | HTTPS git push/pull | GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic) |
-| **SSH key** (alternative to PAT) | SSH git push/pull | Generate with `ssh-keygen`, add public key to GitHub → Settings → SSH keys |
+| **GitHub account** | Git operations, PR creation | Create at [github.com](https://github.com) |
+| **SSH key** (recommended) | SSH git push/pull | Generate with `ssh-keygen`, add public key to GitHub → Settings → SSH keys |
 
-## PAT Scopes Required
+> **Note:** Individual developer PATs should be managed through each developer's own GitHub settings. For automated/CI operations, use the Paperclip secrets token exclusively.
+>
+> **Warning:** Fine-grained PATs (prefix `github_pat_`) may have limited API scope. Classic PATs are recommended for broader access including PR creation via API.
 
-The PAT needs these scopes:
-- `repo` — full control of private repositories
-- `workflow` — update GitHub Action workflows (if CI/CD is used)
-
-## Who Needs to Provide What
+## Responsibilities
 
 The **Board** must:
 
 1. **Create the GitHub repository** — Done: `https://github.com/ovihub/onboarding`
 2. **Add team members** — Invite developers/agents to the `ovihub` organization or as collaborators
-3. **Provision PATs or SSH keys** — Each developer needs their own credentials
+3. **Maintain the access token in Paperclip secrets** — The board provisions and rotates the token via Paperclip's secret management
 4. **Set branch protection rules** — Require PR reviews on `main`
 
 ## Verification
 
-To verify your credentials work:
+To verify your local credentials work for development:
 
 ```bash
 git clone https://github.com/ovihub/onboarding.git
@@ -38,4 +47,6 @@ git commit -m "test: verify credentials"
 git push origin main
 ```
 
-If push succeeds, credentials are configured correctly.
+> **Important:** If using HTTPS, configure a credential manager or use SSH. Never embed tokens in remote URLs.
+
+If push succeeds, your local credentials are configured correctly.
