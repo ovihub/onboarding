@@ -13,13 +13,23 @@ cd onboarding
 
 ```
 onboarding/
-├── docs/           # Project documentation
-├── src/            # Source code
-├── tests/          # Test suites
-├── .github/        # GitHub workflows and templates
-├── README.md       # This file
-└── .gitignore      # Git ignore rules
+├── .github/              # CI/CD, PR templates, CODEOWNERS (company-wide)
+├── docs/                 # Company-level documentation
+├── CONTEXT.md            # Project vocabulary and conventions
+├── README.md             # Company overview
+├── .gitignore
+└── projects/             # All projects live here
+    └── <projectname>/    # One folder per project
+        ├── src/          # Project source code
+        ├── tests/        # Project tests
+        └── docs/         # Project-specific docs
 ```
+
+### Active Projects
+
+| Project | Path | Description |
+|---------|------|-------------|
+| Onboarding | `projects/onboarding/` | Initial company project |
 
 ## Developer Workflow
 

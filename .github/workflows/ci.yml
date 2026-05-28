@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -12,11 +12,35 @@ concurrency:
 
 jobs:
   # ──────────────────────────────────────────────
+  # Discover which projects have package.json
+  # ──────────────────────────────────────────────
+  discover:
+    name: Discover Projects
+    runs-on: ubuntu-latest
+    outputs:
+      projects: ${{ steps.find.outputs.projects }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Find project directories
+        id: find
+        run: |
+          # Find all directories under projects/ that contain a package.json
+          PROJECTS=$(find projects -name 'package.json' -not -path '*/node_modules/*' -exec dirname {} \; | jq -R . | jq -s .)
+          echo "projects=${PROJECTS}" >> "$GITHUB_OUTPUT"
+          echo "Found projects: ${PROJECTS}"
+
+  # ──────────────────────────────────────────────
   # Lint — formatting, secrets, commit messages
   # ──────────────────────────────────────────────
   lint:
     name: Lint & Format Check
     runs-on: ubuntu-latest
+    needs: discover
+    strategy:
+      matrix:
+        project: ${{ fromJson(needs.discover.outputs.projects) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,33 +50,29 @@ jobs:
         run: |
           if [ -f .nvmrc ]; then echo "node_version=$(cat .nvmrc)" >> "$GITHUB_OUTPUT"; fi
 
-      - name: Detect Node.js project
-        id: detect-node
-        run: |
-          if [ -f package.json ]; then
-            echo "is_node=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "is_node=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Setup Node.js
-        if: steps.detect-node.outputs.is_node == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ steps.nvmrc.outputs.node_version || '20' }}
           cache: npm
+          cache-dependency-path: ${{ matrix.project }}/package-lock.json
 
       - name: Install dependencies
-        if: steps.detect-node.outputs.is_node == 'true'
+        working-directory: ${{ matrix.project }}
         run: npm ci
 
       - name: Run Prettier check
-        if: steps.detect-node.outputs.is_node == 'true'
+        working-directory: ${{ matrix.project }}
         run: npx prettier --check .
 
-      - name: Echosystem — no package.json
-        if: steps.detect-node.outputs.is_node == 'false'
-        run: echo "No package.json detected — skipping Node lint steps"
+      - name: Run lint
+        working-directory: ${{ matrix.project }}
+        run: |
+          if npm run | grep -q " lint"; then
+            npm run lint
+          else
+            echo "No lint script — skipping"
+          fi
 
       - name: Check for accidentally committed secrets
         run: |
@@ -67,7 +87,7 @@ jobs:
         if: github.event_name == 'push'
         run: |
           COMMIT_MSG=$(git log --format=%B -n 1)
-          # Allowed types: feat, fix, docs, test, refactor, chore
+          # Allowed types: feat, fix, docs, test, refactor, chore, ci
           if ! echo "$COMMIT_MSG" | grep -qE '^(feat|fix|docs|test|refactor|chore|ci)(\(.+\))?: .+'; then
             echo "::warning ::Commit message does not follow convention: <type>: <desc>"
             echo "::warning ::Allowed types: feat, fix, docs, test, refactor, chore, ci"
@@ -80,6 +100,9 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     needs: lint
+    strategy:
+      matrix:
+        project: ${{ fromJson(needs.discover.outputs.projects) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -89,30 +112,21 @@ jobs:
         run: |
           if [ -f .nvmrc ]; then echo "node_version=$(cat .nvmrc)" >> "$GITHUB_OUTPUT"; fi
 
-      - name: Detect Node.js project
-        id: detect-node
-        run: |
-          if [ -f package.json ]; then
-            echo "is_node=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "is_node=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Setup Node.js
-        if: steps.detect-node.outputs.is_node == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ steps.nvmrc.outputs.node_version || '20' }}
           cache: npm
+          cache-dependency-path: ${{ matrix.project }}/package-lock.json
 
       - name: Install dependencies
-        if: steps.detect-node.outputs.is_node == 'true'
+        working-directory: ${{ matrix.project }}
         run: npm ci
 
       - name: Run typecheck
-        if: steps.detect-node.outputs.is_node == 'true'
+        working-directory: ${{ matrix.project }}
         run: |
-          # Run tsc --noEmit if tsbuildinfo or tsconfig.json exists
+          # Run tsc --noEmit if tsconfig.json exists
           if [ -f tsconfig.json ]; then
             npx tsc --noEmit
           else
@@ -120,7 +134,7 @@ jobs:
           fi
 
       - name: Run build
-        if: steps.detect-node.outputs.is_node == 'true'
+        working-directory: ${{ matrix.project }}
         run: |
           # Run build script if defined in package.json
           if npm run | grep -q " build"; then
@@ -129,10 +143,6 @@ jobs:
             echo "No build script in package.json — skipping"
           fi
 
-      - name: Echosystem — no package.json
-        if: steps.detect-node.outputs.is_node == 'false'
-        run: echo "No package.json detected — skipping Node build steps"
-
   # ──────────────────────────────────────────────
   # Test — unit + integration
   # ──────────────────────────────────────────────
@@ -140,6 +150,9 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     needs: lint
+    strategy:
+      matrix:
+        project: ${{ fromJson(needs.discover.outputs.projects) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -149,28 +162,19 @@ jobs:
         run: |
           if [ -f .nvmrc ]; then echo "node_version=$(cat .nvmrc)" >> "$GITHUB_OUTPUT"; fi
 
-      - name: Detect Node.js project
-        id: detect-node
-        run: |
-          if [ -f package.json ]; then
-            echo "is_node=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "is_node=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Setup Node.js
-        if: steps.detect-node.outputs.is_node == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ steps.nvmrc.outputs.node_version || '20' }}
           cache: npm
+          cache-dependency-path: ${{ matrix.project }}/package-lock.json
 
       - name: Install dependencies
-        if: steps.detect-node.outputs.is_node == 'true'
+        working-directory: ${{ matrix.project }}
         run: npm ci
 
       - name: Run tests
-        if: steps.detect-node.outputs.is_node == 'true'
+        working-directory: ${{ matrix.project }}
         run: |
           if npm run | grep -q " test"; then
             npm test -- --coverage
@@ -178,9 +182,14 @@ jobs:
             echo "No test script in package.json — skipping"
           fi
 
-      - name: Echosystem — no package.json
-        if: steps.detect-node.outputs.is_node == 'false'
-        run: echo "No package.json detected — skipping Node test steps"
+      - name: Run smoke tests
+        working-directory: ${{ matrix.project }}
+        run: |
+          if npm run | grep -q " test:smoke"; then
+            npm run test:smoke
+          else
+            echo "No smoke test script — skipping"
+          fi
 
   # ──────────────────────────────────────────────
   # PR label / size check
@@ -226,7 +235,7 @@ jobs:
         run: |
           ADDITIONS=$(gh pr view ${{ github.event.number }} --json additions --jq '.additions')
           if [ "$ADITIONS" -gt 500 ]; then
-            echo "::warning ::PR adds $ADDITIONS lines. Consider splitting into smaller PRs."
+            echo "::warning ::PR adds $ADITIONS lines. Consider splitting into smaller PRs."
           else
             echo "✓ PR size: $ADDITIONS additions"
           fi

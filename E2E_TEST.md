@@ -1,1 +1,0 @@
-# E2E Workflow Test\n\nThis file verifies the full GitHub workflow: clone → branch → commit → push → PR.\n\n- Branch protection: 1 review required on main\n- CI pipeline runs on PR\n- PR template applied

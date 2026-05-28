@@ -16,6 +16,22 @@
 - [ ] chore — build, CI, tooling
 - [ ] ci — CI/CD configuration
 
+## Target Branch Branch
+
+- [ ] feature/* → develop
+- [ ] fix/* → develop
+- [ ] develop → main (release)
+- [ ] hotfix/* → main
+
+## Reviewers Required
+
+All PRs require **2 approvals**:
+
+- [ ] **Lead Engineer** — technical review (code quality, architecture)
+- [ ] **Quality Reviewer** — quality review (test coverage, edge cases, docs)
+
+> A single person cannot fulfill both roles on the same PR.
+
 ## Checklist
 
 - [ ] Branch follows naming convention (`<type>/<issue-id>-<desc>`)
@@ -24,6 +40,7 @@
 - [ ] Tests pass locally
 - [ ] Documentation updated if needed
 - [ ] No secrets or credentials in code
+- [ ] Requested review from Lead Engineer and Quality Reviewer
 
 ## Testing
 

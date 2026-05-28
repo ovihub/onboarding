@@ -5,7 +5,10 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+// From projects/onboarding/tests/smoke → go up to projects/onboarding (project root)
 const PROJECT_ROOT = join(__dirname, '..', '..');
+// Repo root is 2 levels above project root (_default/ in deployment, or where .git lives)
+const REPO_ROOT = join(PROJECT_ROOT, '..', '..');
 
 describe('CI Pipeline Smoke Test', () => {
 
@@ -33,16 +36,16 @@ describe('CI Pipeline Smoke Test', () => {
   });
 
   describe('CI workflow', () => {
-    it('should have a GitHub Actions workflow file', () => {
-      const wfDir = join(PROJECT_ROOT, '.github', 'workflows');
-      assert.ok(existsSync(wfDir), '.github/workflows directory must exist');
+    it('should have a GitHub Actions workflow file at repo root', () => {
+      const wfDir = join(REPO_ROOT, '.github', 'workflows');
+      assert.ok(existsSync(wfDir), '.github/workflows directory must exist at repo root');
       // At least one .yml workflow file must exist
       const workflows = readdirSync(wfDir).filter(f => f.endsWith('.yml') || f.endsWith('.yaml'));
       assert.ok(workflows.length > 0, 'at least one workflow file (.yml/.yaml) must exist');
     });
 
     it('should have a valid CI workflow with required stages', () => {
-      const wfDir = join(PROJECT_ROOT, '.github', 'workflows');
+      const wfDir = join(REPO_ROOT, '.github', 'workflows');
       const workflowFiles = readdirSync(wfDir).filter(f => f.endsWith('.yml') || f.endsWith('.yaml'));
       // Find the CI workflow (first one or one named ci*)
       const ciFile = workflowFiles.find(f => f.startsWith('ci')) || workflowFiles[0];
@@ -83,6 +86,18 @@ describe('CI Pipeline Smoke Test', () => {
     it('should run from the correct project root', () => {
       assert.ok(existsSync(join(PROJECT_ROOT, 'package.json')),
         'project root must contain package.json');
+    });
+
+    it('should have a package.json in at least one project folder', () => {
+      // projects/ dir exists at repo root
+      const projectsDir = join(REPO_ROOT, 'projects');
+      assert.ok(existsSync(projectsDir), 'projects/ directory must exist at repo root');
+      // At least one project has a package.json
+      const projectDirs = readdirSync(projectsDir);
+      const hasPkg = projectDirs.some(d =>
+        existsSync(join(projectsDir, d, 'package.json'))
+      );
+      assert.ok(hasPkg, 'at least one project must contain package.json');
     });
   });
 });

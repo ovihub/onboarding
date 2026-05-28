@@ -23,7 +23,7 @@ When working within the Paperclip environment, the token is available through Pa
 
 > **Note:** Individual developer PATs should be managed through each developer's own GitHub settings. For automated/CI operations, use the Paperclip secrets token exclusively.
 >
-> **Warning:** Fine-grained PATs (prefix `github_pat_`) may have limited API scope. Classic PATs are recommended for broader access including PR creation via API.
+> **Warning:** Fine-grained PATs (prefix `github_pat_`) have limited API scope. In testing, the board's fine-grained PAT could push code but **could not create pull requests** via REST or GraphQL API. A classic PAT with `repo` scope is required for programmatic PR creation. Request the board provision one via Paperclip secrets if automated PR creation is needed.
 
 ## Responsibilities
 

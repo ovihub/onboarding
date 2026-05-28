@@ -1,12 +1,12 @@
 {
-  "name": "ovihub-onboarding",
+  "name": "onboarding",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "AI Human software solutions — company repository",
+  "description": "AI Human software solutions — Onboarding project",
   "scripts": {
-    "test": "cd projects/onboarding && npm test",
-    "test:smoke": "cd projects/onboarding && npm run test:smoke",
+    "test": "node --test tests/**/*.test.js",
+    "test:smoke": "node tests/smoke/ci-pipeline.test.js",
     "lint": "echo 'lint stub — no linter configured yet'",
     "typecheck": "echo 'typecheck stub — no TypeScript configured yet'"
   },

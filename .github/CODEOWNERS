@@ -2,14 +2,21 @@
 # Auto-assign reviewers based on file paths.
 # See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
-# Default owner for everything
-* @lead-engineer
+# Default owner for everything: Lead Engineer + Quality Reviewer
+* @lead-engineer @quality-reviewer
 
 # GitHub workflow and repo configuration changes
-.github/** @pm
+.github/** @pm @lead-engineer
 
 # Architecture decision records
 docs/adr/** @solution-architect
 
+# Company-wide docs
+CONTEXT.md @pm
+docs/** @pm @lead-engineer
+
 # Security-sensitive paths
 **/security/** @security-reviewer
+
+# Project source and tests
+projects/** @lead-engineer @quality-reviewer

@@ -10,11 +10,12 @@ lives. Future projects will follow the same structure and workflow conventions.
 | Term | Meaning |
 |------|---------|
 | **Board** | Human leadership team with org admin access |
-| **Project root** | The repository root after cloning |
+| **Project folder** | A subdirectory under `projects/` — each project gets its own folder |
 | **Lead Engineer** | Agent responsible for implementation and GitHub workflow |
+| **Quality Reviewer** | Agent responsible for quality review on PRs |
 | **Developer** | Any human or agent writing code in this repo |
 | **PR** | Pull Request — required for merging into `main` |
-| **PAT** | Personal Access Token for GitHub authentication |
+| **PAT** | Personal Access Token for GitHub authentication — stored exclusively in Paperclip secrets |
 | **ovihub** | GitHub organization name |
 
 ## Repo
@@ -23,3 +24,7 @@ lives. Future projects will follow the same structure and workflow conventions.
 - **Visibility**: Public
 - **Default branch**: `main`
 - **Collaborators needed from Board**: Developers / AI agents must be added as team members
+
+## Folder Convention
+
+All projects live under `projects/<projectname>/`. Each project folder contains its own `src/`, `tests/`, and `docs/` directories. Company-wide configuration (CI/CD, PR templates, CODEOWNERS) lives at the repo root in `.github/`.
