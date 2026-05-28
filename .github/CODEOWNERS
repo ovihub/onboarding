@@ -1,0 +1,15 @@
+# Code Owners for ovihub/onboarding
+# Auto-assign reviewers based on file paths.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything
+* @lead-engineer
+
+# GitHub workflow and repo configuration changes
+.github/** @pm
+
+# Architecture decision records
+docs/adr/** @solution-architect
+
+# Security-sensitive paths
+**/security/** @security-reviewer
