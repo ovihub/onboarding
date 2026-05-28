@@ -1,22 +1,18 @@
 # Code Owners for ovihub/onboarding
 # Auto-assign reviewers based on file paths.
 # See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
-
-# Default owner for everything: Lead Engineer + Quality Reviewer
-* @lead-engineer @quality-reviewer
-
-# GitHub workflow and repo configuration changes
-.github/** @pm @lead-engineer
-
-# Architecture decision records
-docs/adr/** @solution-architect
-
-# Company-wide docs
-CONTEXT.md @pm
-docs/** @pm @lead-engineer
-
-# Security-sensitive paths
-**/security/** @security-reviewer
-
-# Project source and tests
-projects/** @lead-engineer @quality-reviewer
+#
+# NOTE: All previously-referenced GitHub users (@lead-engineer, @quality-reviewer,
+# @pm, @solution-architect, @security-reviewer) did not exist as actual GitHub
+# accounts, causing CODEOWNERS to fail silently. Replaced with explicit
+# reviewer assignment via Paperclip PM workflow until valid GitHub handles
+# are configured.
+#
+# TODO: Replace "ovihub" below with actual contributor handles once confirmed.
+* @ovihub
+.github/** @ovihub
+docs/adr/** @ovihub
+CONTEXT.md @ovihub
+docs/** @ovihub
+**/security/** @ovihub
+projects/** @ovihub
