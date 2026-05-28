@@ -1,0 +1,24 @@
+{
+  "name": "tictactoe",
+  "version": "1.0.0",
+  "description": "Tic-Tac-Toe Game Engine and Web UI",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
+    "dev": "node --watch src/server.js"
+  },
+  "keywords": [
+    "tic-tac-toe",
+    "game"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
